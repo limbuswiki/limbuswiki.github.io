@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML 생성기</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 20px;
+            zoom: 0.67;
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .panel {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-height: 150vh;
+            width: 750px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .preview-panel {
+            justify-content: center;
+        }
+
+        .menu-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .menu-btn {
+            flex: 1;
+            padding: 12px 20px;
+            background: linear-gradient(to bottom, #ffffff, #f0f0f0);
+            color: #333;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .menu-btn:hover {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .menu-btn.active {
+            background: linear-gradient(to bottom, #000000, #333333);
+            color: white;
+            border: none;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px 20px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        .section-title:hover {
+            background: #f8f8f8;
+        }
+
+        .section-title .arrow {
+            transition: transform 0.3s;
+        }
+
+        .section-title.collapsed .arrow {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            max-height: 900px;
+            overflow-y: auto;
+            transition: max-height 0.3s ease;
+        }
+
+        .section-content.collapsed {
+            max-height: 0;
+        }
+
+        .add-remove-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #f0f0f0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.3s;
+        }
+
+        .icon-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .form-input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .content-area {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .preview-area {
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            padding: 30px;
+            min-height: 800px;
+            background: #f5f5f5;
+            overflow-x: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .menu-content {
+            display: none;
+        }
+
+        .menu-content.active {
+            display: block;
+        }
+
+        .download-btn {
+            padding: 15px;
+            background: linear-gradient(to bottom, #ffffff, #f0f0f0);
+            color: #333;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .download-btn:hover {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .download-btn.black {
+            background: linear-gradient(to bottom, #000000, #333333);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .download-btn.black:hover {
+            background: linear-gradient(to bottom, #1a1a1a, #404040);
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .download-btn.red {
+            background: linear-gradient(to bottom, #8b0000, #5a0000);
+            color: white;
+            box-shadow: 0 2px 4px rgba(139, 0, 0, 0.3);
+        }
+
+        .download-btn.red:hover {
+            background: linear-gradient(to bottom, #a00000, #6b0000);
+            box-shadow: 0 3px 5px rgba(139, 0, 0, 0.4);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .button-group button {
+            flex: 1;
+            margin: 0;
+        }
+
+        .toc-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            transition: all 0.2s;
+            cursor: grab;
+        }
+
+        .toc-item:active {
+            cursor: grabbing;
+        }
+
+        .toc-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: #fafafa;
+        }
+
+        .toc-item.sub-item {
+            margin-left: 30px;
+            background: #f8f8f8;
+        }
+
+        .toc-item input {
+            flex: 1;
+            cursor: text;
+        }
+        
+        .toc-item button {
+            cursor: pointer;
+        }
+
+        .toc-btn-group {
+            display: flex;
+            gap: 5px;
+        }
+
+        .toc-action-btn {
+            background: #000000;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .toc-action-btn:hover {
+            background: #333333;
+        }
+
+        .toc-remove {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .toc-remove:hover {
+            background: #c0392b;
+        }
+
+        .preview-toc {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 12px 20px 18px;
+            margin-bottom: 20px;
+            background: white;
+        }
+
+        .preview-toc-title {
+            font-size: 1.25em;
+            margin-bottom: 10px;
+        }
+
+        .preview-toc-item {
+            color: #006dd7;
+            margin: 5px 0;
+        }
+
+        .preview-toc-item.sub {
+            padding-left: 22px;
+        }
+
+        .preview-info-table {
+            width: 325px;
+            border: 2px solid #bd0000;
+            border-collapse: collapse;
+            background: white;
+            margin-bottom: 20px;
+        }
+
+        .preview-info-table td {
+            border: 1px solid #000;
+            padding: 8px;
+        }
+
+        .preview-header {
+            background: #000;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .preview-label {
+            background: #000;
+            color: #e1bf02;
+            font-weight: bold;
+            text-align: center;
+            width: 30%;
+        }
+
+        .preview-value {
+            background: white;
+            text-align: left;
+            padding-left: 12px;
+        }
+
+        .color-preview {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .content-editor {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            background: white;
+            margin-top: 10px;
+        }
+
+        .content-editor textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .content-section-header {
+            background: #000000;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+            margin-top: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .content-section-header:hover {
+            background: #333333;
+        }
+
+        .preview-content h3 {
+            color: #333;
+            font-size: 1.2em;
+            margin: 20px 0 10px 0;
+            padding-bottom: 5px;
+        }
+
+        .preview-content hr {
+            margin: 0 0 15px 0;
+            border: none;
+            border-top: 2px solid #ddd;
+        }
+
+        .preview-content p {
+            line-height: 1.6;
+            margin: 10px 0;
+            color: #333;
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid #996633;
+            margin-top: 2px;
+            margin-bottom: 6px;
+        }
+
+        .preview-table td {
+            border: 1px solid #996633;
+            padding: 8px;
+            color: #ffcc99;
+        }
+
+        .preview-table .header-cell {
+            background-image: linear-gradient(120deg, #996633 2%, transparent 2%, transparent 3%, #996633 3%, #996633 4%, transparent 4%, transparent 5%, #996633 5%, #996633 6%, transparent 6%, transparent 94%, #996633 94%, #996633 95%, transparent 95%, transparent 96%, #996633 96%, #996633 97%, transparent 97%, transparent 98%, #996633 98%);
+            background-color: #170c0a;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .preview-table .label-cell {
+            background-color: #000000;
+            text-align: center;
+            width: 20%;
+        }
+
+        .preview-table .value-cell {
+            background-color: #3a2716;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="panel">
+            <div class="menu-buttons">
+                <button class="menu-btn active" onclick="switchMenu(0)">목차 및 프로필</button>
+                <button class="menu-btn" onclick="switchMenu(1)">인격</button>
+                <button class="menu-btn" onclick="switchMenu(2)">EGO</button>
+                <button class="menu-btn" onclick="switchMenu(3)">본문 작성</button>
+            </div>
+
+            <div class="menu-content active" id="menu-0">
+                <div class="section">
+                    <div class="section-title collapsed" onclick="toggleSection('toc')">
+                        <span>목차 설정</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="section-content collapsed" id="toc-content">
+                        <div class="add-remove-section">
+                            <div style="flex: 1; padding: 10px; background: white; border: 1px solid #ddd; border-radius: 6px;">목차 항목 추가</div>
+                            <button class="download-btn black" onclick="addTocItem()" style="padding: 8px 20px; border-radius: 15px;">추가</button>
+                        </div>
+                        <div class="content-area" id="tocList" style="margin-top: 15px;"></div>
+                    </div>
+                </div>
+
+                <div class="section" style="margin-top: 20px;">
+                    <div class="section-title collapsed" onclick="toggleSection('profile')">
+                        <span>위키 프로필 설정</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="section-content collapsed" id="profile-content">
+                        <div class="content-area">
+                            <div class="form-group">
+                                <label class="form-label">번호</label>
+                                <input type="text" class="form-input" id="number" placeholder="번호를 입력하세요" oninput="updateMenu1Preview()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">이름 (영문)</label>
+                                <input type="text" class="form-input" id="nameEng" placeholder="영문 이름을 입력하세요" oninput="updateMenu1Preview()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">이름 (한글)</label>
+                                <input type="text" class="form-input" id="nameKor" placeholder="한글 이름을 입력하세요" oninput="updateMenu1Preview()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">대사</label>
+                                <input type="text" class="form-input" id="quote" placeholder="대사를 입력하세요" oninput="updateMenu1Preview()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">본명</label>
+                                <input type="text" class="form-input" id="fullName" placeholder="본명을 입력하세요" oninput="updateMenu1Preview()">
+                            </div>
+                            <div class="form-group">
+                                <div class="form-input-group">
+                                    <div>
+                                        <label class="form-label">성별</label>
+                                        <input type="text" class="form-input" id="gender" placeholder="성별을 입력하세요" oninput="updateMenu1Preview()">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">신장</label>
+                                        <input type="text" class="form-input" id="height" placeholder="신장을 입력하세요" oninput="updateMenu1Preview()">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="form-input-group">
+                                    <div>
+                                        <label class="form-label">소속</label>
+                                        <input type="text" class="form-input" id="affiliation" placeholder="소속을 입력하세요" oninput="updateMenu1Preview()">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">직위</label>
+                                        <input type="text" class="form-input" id="position" placeholder="직위를 입력하세요" oninput="updateMenu1Preview()">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">상징색 이름</label>
+                                <input type="text" class="form-input" id="colorName" placeholder="상징색 이름을 입력하세요" oninput="updateMenu1Preview()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">상징색 코드</label>
+                                <input type="text" class="form-input" id="colorCode" placeholder="상징색 코드를 입력하세요" oninput="updateMenu1Preview()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">언어별 표기 (한 줄씩 입력)</label>
+                                <textarea class="form-input" id="languages" rows="3" placeholder="언어별 표기를 입력하세요" oninput="updateMenu1Preview()" style="resize: vertical;"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-content" id="menu-1">
+                <div class="content-area">
+                    <div class="form-group">
+                        <div class="form-input-group">
+                            <div>
+                                <label class="form-label">수감자 이름</label>
+                                <input type="text" class="form-input" id="prisonerName" placeholder="이름을 입력하세요" oninput="updateMenu2Preview()">
+                            </div>
+                            <div>
+                                <label class="form-label">시즌</label>
+                                <input type="text" class="form-input" id="season" placeholder="시즌을 입력하세요" oninput="updateMenu2Preview()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-input-group">
+                            <div>
+                                <label class="form-label">인격 등급</label>
+                                <input type="text" class="form-input" id="grade" placeholder="등급을 입력하세요" oninput="updateMenu2Preview()">
+                            </div>
+                            <div>
+                                <label class="form-label">출시 시기</label>
+                                <input type="text" class="form-input" id="releaseDate" placeholder="날짜를 입력하세요" oninput="updateMenu2Preview()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">티켓 인사말</label>
+                        <input type="text" class="form-input" id="greeting" placeholder="대사를 입력하세요" oninput="updateMenu2Preview()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">획득 방법</label>
+                        <input type="text" class="form-input" id="obtainMethod" placeholder="획득 방법을 입력하세요" oninput="updateMenu2Preview()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">특성 키워드</label>
+                        <input type="text" class="form-input" id="keywords" placeholder="키워드를 입력하세요" oninput="updateMenu2Preview()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-content" id="menu-2">
+                <div class="content-area">
+                    <div class="form-group">
+                        <label class="form-label">로고 이미지 URL</label>
+                        <input type="text" class="form-input" id="logoUrl" placeholder="https://imgur.com/..." oninput="updateMenu3Preview()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">인격 명칭</label>
+                        <input type="text" class="form-input" id="egoTitle" placeholder="인격 명칭" oninput="updateMenu3Preview()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">대사</label>
+                        <input type="text" class="form-input" id="egoQuote" placeholder="대사" oninput="updateMenu3Preview()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">일러스트 이미지 URL</label>
+                        <input type="text" class="form-input" id="illustUrl" placeholder="https://imgur.com/..." oninput="updateMenu3Preview()">
+                    </div>
+                    <div class="form-group">
+                        <div class="form-input-group">
+                            <div>
+                                <label class="form-label">환상체</label>
+                                <input type="text" class="form-input" id="abnormality" placeholder="환상체 이름" oninput="updateMenu3Preview()">
+                            </div>
+                            <div>
+                                <label class="form-label">시즌</label>
+                                <input type="text" class="form-input" id="egoSeason" placeholder="시즌" oninput="updateMenu3Preview()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-input-group">
+                            <div>
+                                <label class="form-label">E.G.O 명칭</label>
+                                <input type="text" class="form-input" id="egoName" placeholder="에고 이름" oninput="updateMenu3Preview()">
+                            </div>
+                            <div>
+                                <label class="form-label">E.G.O 등급</label>
+                                <input type="text" class="form-input" id="egoGrade" placeholder="등급 (텍스트)" oninput="updateMenu3Preview()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-input-group">
+                            <div>
+                                <label class="form-label">수감자</label>
+                                <input type="text" class="form-input" id="egoPrisoner" placeholder="수감자 이름" oninput="updateMenu3Preview()">
+                            </div>
+                            <div>
+                                <label class="form-label">출시 시기</label>
+                                <input type="text" class="form-input" id="egoReleaseDate" placeholder="날짜" oninput="updateMenu3Preview()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">티켓 인사말</label>
+                        <input type="text" class="form-input" id="egoGreeting" placeholder="티켓 인사말" oninput="updateMenu3Preview()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">획득 방법</label>
+                        <input type="text" class="form-input" id="egoObtain" placeholder="획득 방법" oninput="updateMenu3Preview()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">특성 키워드</label>
+                        <input type="text" class="form-input" id="egoKeywords" placeholder="키워드" oninput="updateMenu3Preview()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">배경색 코드</label>
+                        <input type="text" class="form-input" id="egoBgColor" placeholder="예: #73468a" oninput="updateMenu3Preview()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-content" id="menu-3">
+                <div id="contentSections"></div>
+            </div>
+
+            <div class="button-group">
+                <button class="download-btn black" onclick="document.getElementById('jsonUpload').click()">JSON 불러오기</button>
+                <button class="download-btn black" onclick="saveJSON()">JSON 저장</button>
+                <input type="file" id="jsonUpload" accept=".json" style="display: none;" onchange="loadJSON(event)">
+            </div>
+            
+            <div style="margin-top: 10px;">
+                <button class="download-btn red" style="width: 100%;" onclick="downloadHTML()">HTML 다운로드</button>
+            </div>
+        </div>
+
+        <div class="panel preview-panel">
+            <div class="preview-area" id="preview"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentState = {
+            activeMenu: 0,
+            sectionsVisible: {
+                toc: false,
+                profile: false
+            },
+            tocItems: [
+                { level: 1, text: '1. 개요' },
+                { level: 1, text: '2. 상세' },
+                { level: 1, text: '3. 작중 행적' }
+            ],
+            wikiProfile: {
+                number: 'No. 00',
+                nameEng: 'MARCH',
+                nameKor: '마치',
+                quote: '초대하지도 않았는데 듬뿍 앉아 버리는 게 더 실례야.',
+                fullName: '마치 헤이어',
+                gender: '여성',
+                height: '166cm',
+                affiliation: '림버스 컴퍼니',
+                position: '관리자',
+                colorName: 'MADNESS RED',
+                colorCode: '#8b2d2c',
+                languages: '🇰🇷 마치\n🇺🇸 March\n🇯🇵 マーチ'
+            },
+            identityInfo: {
+                prisonerName: '',
+                season: '',
+                grade: '',
+                releaseDate: '',
+                greeting: '',
+                obtainMethod: '',
+                keywords: ''
+            },
+            egoInfo: {
+                logoUrl: '',
+                title: '',
+                quote: '',
+                illustUrl: '',
+                abnormality: '',
+                season: '',
+                egoName: '',
+                egoGrade: '',
+                prisoner: '',
+                releaseDate: '',
+                greeting: '',
+                obtainMethod: '',
+                keywords: '',
+                bgColor: '#73468a'
+            },
+            contentSections: {}
+        };
+
+        function switchMenu(index) {
+            document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.menu-content').forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.menu-btn')[index].classList.add('active');
+            document.getElementById(`menu-${index}`).classList.add('active');
+            currentState.activeMenu = index;
+            
+            if (index === 0) {
+                renderTocList();
+                loadWikiProfile();
+                updateMenu1Preview();
+            } else if (index === 1) {
+                loadIdentityInfo();
+                updateMenu2Preview();
+            } else if (index === 2) {
+                loadEgoInfo();
+                updateMenu3Preview();
+            } else if (index === 3) {
+                renderContentSections();
+                updateMenu4Preview();
+            }
+        }
+
+        function toggleSection(sectionId) {
+            const content = document.getElementById(`${sectionId}-content`);
+            const title = content.previousElementSibling;
+            content.classList.toggle('collapsed');
+            title.classList.toggle('collapsed');
+            
+            // Update visibility state
+            const isVisible = !content.classList.contains('collapsed');
+            currentState.sectionsVisible[sectionId] = isVisible;
+            
+            // Update preview
+            updateMenu1Preview();
+        }
+
+        function renderTocList() {
+            const tocList = document.getElementById('tocList');
+            tocList.innerHTML = '';
+            
+            currentState.tocItems.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = item.level === 2 ? 'toc-item sub-item' : 'toc-item';
+                div.draggable = true;
+                div.dataset.index = index;
+                
+                // Drag event listeners
+                div.addEventListener('dragstart', handleDragStart);
+                div.addEventListener('dragover', handleDragOver);
+                div.addEventListener('dragenter', handleDragEnter);
+                div.addEventListener('dragleave', handleDragLeave);
+                div.addEventListener('drop', handleDrop);
+                div.addEventListener('dragend', handleDragEnd);
+                
+                // Extract just the title without the number
+                const titleWithoutNumber = item.text.replace(/^[\d.]+\.?\s*/, '');
+                
+                div.innerHTML = `
+                    <span class="drag-handle" style="cursor: grab; padding: 0 10px; font-size: 18px; color: #999; user-select: none;">⋮⋮</span>
+                    <input type="text" class="form-input toc-input" value="${titleWithoutNumber}" 
+                           onchange="updateTocItemText(${index}, this.value)">
+                    <div class="toc-btn-group">
+                        ${item.level === 1 ? `<button class="toc-action-btn" onclick="addSubItem(${index})">하위</button>` : ''}
+                        <button class="toc-remove" onclick="removeTocItemAt(${index})">삭제</button>
+                    </div>
+                `;
+                
+                // Prevent dragging when interacting with input or buttons
+                const input = div.querySelector('.toc-input');
+                const buttons = div.querySelectorAll('button');
+                
+                input.addEventListener('mousedown', (e) => e.stopPropagation());
+                input.addEventListener('click', (e) => e.stopPropagation());
+                buttons.forEach(btn => {
+                    btn.addEventListener('mousedown', (e) => e.stopPropagation());
+                    btn.addEventListener('click', (e) => e.stopPropagation());
+                });
+                tocList.appendChild(div);
+            });
+            
+            renumberTocItems();
+        }
+
+        let draggedIndex = null;
+        let dropIndicator = null;
+
+        function handleDragStart(e) {
+            draggedIndex = parseInt(e.currentTarget.dataset.index);
+            e.currentTarget.style.opacity = '0.4';
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            
+            const targetElement = e.currentTarget;
+            const rect = targetElement.getBoundingClientRect();
+            const midpoint = rect.top + rect.height / 2;
+            
+            // Remove all previous indicators
+            document.querySelectorAll('.toc-item').forEach(item => {
+                item.style.borderTop = '';
+                item.style.borderBottom = '';
+            });
+            
+            // Show indicator based on mouse position
+            if (e.clientY < midpoint) {
+                targetElement.style.borderTop = '3px solid #3498db';
+            } else {
+                targetElement.style.borderBottom = '3px solid #3498db';
+            }
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+        }
+
+        function handleDragLeave(e) {
+            // Only remove border if we're actually leaving the element
+            if (!e.currentTarget.contains(e.relatedTarget)) {
+                e.currentTarget.style.borderTop = '';
+                e.currentTarget.style.borderBottom = '';
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            
+            const targetElement = e.currentTarget;
+            const rect = targetElement.getBoundingClientRect();
+            const midpoint = rect.top + rect.height / 2;
+            const dropIndex = parseInt(targetElement.dataset.index);
+            
+            // Clear all borders
+            document.querySelectorAll('.toc-item').forEach(item => {
+                item.style.borderTop = '';
+                item.style.borderBottom = '';
+            });
+            
+            if (draggedIndex !== null && draggedIndex !== dropIndex) {
+                const draggedItem = currentState.tocItems[draggedIndex];
+                const targetItem = currentState.tocItems[dropIndex];
+                
+                // If dragging a sub-item (level 2)
+                if (draggedItem.level === 2) {
+                    // Cannot drop on or above a main item (level 1)
+                    if (targetItem.level === 1) {
+                        alert('하위 항목은 상위 항목 위로 이동할 수 없습니다.');
+                        return;
+                    }
+                    
+                    // Check if target sub-item has the same parent
+                    // Find parent of dragged item
+                    let draggedParentIndex = -1;
+                    for (let i = draggedIndex - 1; i >= 0; i--) {
+                        if (currentState.tocItems[i].level === 1) {
+                            draggedParentIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    // Find parent of target item
+                    let targetParentIndex = -1;
+                    for (let i = dropIndex - 1; i >= 0; i--) {
+                        if (currentState.tocItems[i].level === 1) {
+                            targetParentIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    // Allow moving only within same parent's sub-items or to another parent's sub-items
+                    if (draggedParentIndex === -1 || targetParentIndex === -1) {
+                        return;
+                    }
+                }
+                
+                // Save the dragged content
+                const draggedContent = currentState.contentSections[draggedIndex] || '';
+                
+                // Convert contentSections to array for reordering
+                const contentArray = [];
+                for (let i = 0; i < currentState.tocItems.length; i++) {
+                    contentArray[i] = currentState.contentSections[i] || '';
+                }
+                
+                // Determine if dropping above or below the target
+                const dropAbove = e.clientY < midpoint;
+                
+                // Remove from old position
+                currentState.tocItems.splice(draggedIndex, 1);
+                contentArray.splice(draggedIndex, 1);
+                
+                // Calculate new index
+                let newIndex;
+                if (dropAbove) {
+                    // Drop above target
+                    newIndex = draggedIndex < dropIndex ? dropIndex - 1 : dropIndex;
+                } else {
+                    // Drop below target
+                    newIndex = draggedIndex < dropIndex ? dropIndex : dropIndex + 1;
+                }
+                
+                // Insert at new position
+                currentState.tocItems.splice(newIndex, 0, draggedItem);
+                contentArray.splice(newIndex, 0, draggedContent);
+                
+                // Rebuild contentSections object with new indices
+                currentState.contentSections = {};
+                for (let i = 0; i < contentArray.length; i++) {
+                    if (contentArray[i]) {
+                        currentState.contentSections[i] = contentArray[i];
+                    }
+                }
+                
+                renderTocList();
+                updateMenu1Preview();
+            }
+        }
+
+        function handleDragEnd(e) {
+            e.currentTarget.style.opacity = '1';
+            document.querySelectorAll('.toc-item').forEach(item => {
+                item.style.borderTop = '';
+                item.style.borderBottom = '';
+            });
+            draggedIndex = null;
+        }
+
+        function renumberTocItems() {
+            let mainCounter = 1;
+            let subCounters = {};
+            
+            currentState.tocItems.forEach((item, index) => {
+                if (item.level === 1) {
+                    const titleWithoutNumber = item.text.replace(/^[\d.]+\.?\s*/, '');
+                    item.text = `${mainCounter}. ${titleWithoutNumber}`;
+                    subCounters[mainCounter] = 1;
+                    mainCounter++;
+                } else if (item.level === 2) {
+                    // Find parent main number
+                    let parentNumber = 1;
+                    for (let i = index - 1; i >= 0; i--) {
+                        if (currentState.tocItems[i].level === 1) {
+                            const match = currentState.tocItems[i].text.match(/^(\d+)\./);
+                            if (match) {
+                                parentNumber = parseInt(match[1]);
+                                break;
+                            }
+                        }
+                    }
+                    
+                    const titleWithoutNumber = item.text.replace(/^[\d.]+\.?\s*/, '');
+                    item.text = `${parentNumber}.${subCounters[parentNumber]}. ${titleWithoutNumber}`;
+                    subCounters[parentNumber]++;
+                }
+            });
+            
+            updateMenu1Preview();
+        }
+
+        function updateTocItemText(index, newText) {
+            const item = currentState.tocItems[index];
+            const currentNumber = item.text.match(/^[\d.]+\.?\s*/)?.[0] || '';
+            item.text = currentNumber + newText;
+            updateMenu1Preview();
+        }
+
+        function addTocItem() {
+            const newIndex = currentState.tocItems.length;
+            currentState.tocItems.push({ level: 1, text: '새 항목' });
+            // No need to add to contentSections yet, it will be added when user types
+            renderTocList();
+        }
+
+        function addSubItem(parentIndex) {
+            const newSubItem = { level: 2, text: '새 하위 항목' };
+            
+            let insertIndex = parentIndex + 1;
+            for (let i = parentIndex + 1; i < currentState.tocItems.length; i++) {
+                if (currentState.tocItems[i].level === 1) break;
+                insertIndex = i + 1;
+            }
+            
+            // Convert contentSections to array
+            const contentArray = [];
+            for (let i = 0; i < currentState.tocItems.length; i++) {
+                contentArray[i] = currentState.contentSections[i] || '';
+            }
+            
+            // Insert new item and empty content
+            currentState.tocItems.splice(insertIndex, 0, newSubItem);
+            contentArray.splice(insertIndex, 0, '');
+            
+            // Rebuild contentSections object with new indices
+            currentState.contentSections = {};
+            for (let i = 0; i < contentArray.length; i++) {
+                if (contentArray[i]) {
+                    currentState.contentSections[i] = contentArray[i];
+                }
+            }
+            
+            renderTocList();
+        }
+
+        function removeTocItem() {
+            if (currentState.tocItems.length > 0) {
+                const lastIndex = currentState.tocItems.length - 1;
+                currentState.tocItems.pop();
+                
+                // Remove corresponding content
+                if (currentState.contentSections[lastIndex]) {
+                    delete currentState.contentSections[lastIndex];
+                }
+                
+                renderTocList();
+            }
+        }
+
+        function removeTocItemAt(index) {
+            // Convert contentSections to array
+            const contentArray = [];
+            for (let i = 0; i < currentState.tocItems.length; i++) {
+                contentArray[i] = currentState.contentSections[i] || '';
+            }
+            
+            // Remove the item and its content
+            currentState.tocItems.splice(index, 1);
+            contentArray.splice(index, 1);
+            
+            // Rebuild contentSections object with new indices
+            currentState.contentSections = {};
+            for (let i = 0; i < contentArray.length; i++) {
+                if (contentArray[i]) {
+                    currentState.contentSections[i] = contentArray[i];
+                }
+            }
+            
+            renderTocList();
+        }
+
+        function loadWikiProfile() {
+            document.getElementById('number').value = currentState.wikiProfile.number;
+            document.getElementById('nameEng').value = currentState.wikiProfile.nameEng;
+            document.getElementById('nameKor').value = currentState.wikiProfile.nameKor;
+            document.getElementById('quote').value = currentState.wikiProfile.quote;
+            document.getElementById('fullName').value = currentState.wikiProfile.fullName;
+            document.getElementById('gender').value = currentState.wikiProfile.gender;
+            document.getElementById('height').value = currentState.wikiProfile.height;
+            document.getElementById('affiliation').value = currentState.wikiProfile.affiliation;
+            document.getElementById('position').value = currentState.wikiProfile.position;
+            document.getElementById('colorName').value = currentState.wikiProfile.colorName;
+            document.getElementById('colorCode').value = currentState.wikiProfile.colorCode;
+            document.getElementById('languages').value = currentState.wikiProfile.languages;
+        }
+
+        function updateMenu1Preview() {
+            const info = {
+                number: document.getElementById('number').value || 'No. 00',
+                nameEng: document.getElementById('nameEng').value || 'NAME',
+                nameKor: document.getElementById('nameKor').value || '이름',
+                quote: document.getElementById('quote').value || '대사를 입력하세요',
+                fullName: document.getElementById('fullName').value || '전체 이름',
+                gender: document.getElementById('gender').value || '성별',
+                height: document.getElementById('height').value || '신장',
+                affiliation: document.getElementById('affiliation').value || '소속',
+                position: document.getElementById('position').value || '직위',
+                colorName: document.getElementById('colorName').value || 'COLOR',
+                colorCode: document.getElementById('colorCode').value || '#000000',
+                languages: document.getElementById('languages').value || '언어별 표기'
+            };
+
+            currentState.wikiProfile = info;
+            
+            let previewHTML = '';
+            
+            // Show TOC only if visible
+            if (currentState.sectionsVisible.toc) {
+                let tocHTML = '<div class="preview-toc"><div class="preview-toc-title">목차</div><div style="margin-top: 10px;">';
+                currentState.tocItems.forEach(item => {
+                    const className = item.level === 2 ? 'preview-toc-item sub' : 'preview-toc-item';
+                    tocHTML += `<div class="${className}">${item.text}</div>`;
+                });
+                tocHTML += '</div></div>';
+                previewHTML += tocHTML;
+            }
+            
+            // Show profile only if visible
+            if (currentState.sectionsVisible.profile) {
+                const languageLines = info.languages.split('\n').map(line => line.trim()).filter(line => line);
+                const languageHTML = languageLines.map(line => `${line}<br>`).join('');
+
+                const profileHTML = `
+                    <div class="preview-info-table">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr><td colspan="2" class="preview-header"><span style="color: #bd0000;">${info.number} ⸺ ${info.nameEng}</span><br><span style="color: #bd0000; font-size: 1.7em;"><b>${info.nameKor}</b></span></td></tr>
+                            <tr><td colspan="2" style="background: #000; color: #fff; text-align: center; padding: 8px;">"${info.quote}"</td></tr>
+                            <tr><td class="preview-label">본명</td><td class="preview-value">${info.fullName}</td></tr>
+                            <tr><td class="preview-label">성별</td><td class="preview-value">${info.gender}</td></tr>
+                            <tr><td class="preview-label">신장</td><td class="preview-value">${info.height}</td></tr>
+                            <tr><td class="preview-label">소속</td><td class="preview-value">${info.affiliation}</td></tr>
+                            <tr><td class="preview-label">직위</td><td class="preview-value">${info.position}</td></tr>
+                            <tr><td class="preview-label">상징색</td><td class="preview-value"><span class="color-preview" style="background-color: ${info.colorCode};"><b>${info.colorName}</b> (${info.colorCode})</span></td></tr>
+                            <tr><td class="preview-label">언어별 표기</td><td class="preview-value">${languageHTML}</td></tr>
+                        </table>
+                    </div>
+                `;
+                previewHTML += profileHTML;
+            }
+
+            document.getElementById('preview').innerHTML = `<div>${previewHTML}</div>`;
+        }
+
+        function loadIdentityInfo() {
+            document.getElementById('prisonerName').value = currentState.identityInfo.prisonerName || '';
+            document.getElementById('season').value = currentState.identityInfo.season || '';
+            document.getElementById('grade').value = currentState.identityInfo.grade || '';
+            document.getElementById('releaseDate').value = currentState.identityInfo.releaseDate || '';
+            document.getElementById('greeting').value = currentState.identityInfo.greeting || '';
+            document.getElementById('obtainMethod').value = currentState.identityInfo.obtainMethod || '';
+            document.getElementById('keywords').value = currentState.identityInfo.keywords || '';
+        }
+
+        function updateMenu2Preview() {
+            const data = {
+                prisonerName: document.getElementById('prisonerName').value || '(★이름)',
+                season: document.getElementById('season').value || '(★시즌)',
+                grade: document.getElementById('grade').value || '(★등급)',
+                releaseDate: document.getElementById('releaseDate').value || '(★날짜)',
+                greeting: document.getElementById('greeting').value || '(★대사)',
+                obtainMethod: document.getElementById('obtainMethod').value || '(★획득 방법)',
+                keywords: document.getElementById('keywords').value || '(★키워드)'
+            };
+
+            currentState.identityInfo = data;
+
+            document.getElementById('preview').innerHTML = `
+                <div style="background: #000; padding: 10px;">
+                    <table class="preview-table">
+                        <colgroup>
+                            <col style="width: 20%;"/>
+                            <col style="width: 30%;"/>
+                            <col style="width: 20%;"/>
+                            <col style="width: 30%;"/>
+                        </colgroup>
+                        <tbody>
+                            <tr>
+                                <td class="header-cell" colspan="4">
+                                    <span style="color: #ffcc66; font-size: 15px;"><b>기본 정보</b></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell"><span style="color: #ffcc99;">수감자</span></td>
+                                <td class="value-cell"><span style="color: #ffcc99;">${data.prisonerName}</span></td>
+                                <td class="label-cell"><span style="color: #ffcc99;">시즌</span></td>
+                                <td class="value-cell"><span style="color: #ffcc99;">${data.season}</span></td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell"><span style="color: #ffcc99;">인격 등급</span></td>
+                                <td class="value-cell"><span style="color: #ffcc99;">${data.grade}</span></td>
+                                <td class="label-cell"><span style="color: #ffcc99;">출시 시기</span></td>
+                                <td class="value-cell"><span style="color: #ffcc99;">${data.releaseDate}</span></td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell"><span style="color: #ffcc99;">티켓 인사말</span></td>
+                                <td class="value-cell" colspan="3"><span style="color: #ffcc99;">${data.greeting}</span></td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell"><span style="color: #ffcc99;">획득 방법</span></td>
+                                <td class="value-cell" colspan="3"><span style="color: #ffcc99;">${data.obtainMethod}</span></td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell"><span style="color: #ffcc99;">특성 키워드</span></td>
+                                <td class="value-cell" colspan="3"><span style="color: #ffcc99;">${data.keywords}</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function loadEgoInfo() {
+            document.getElementById('logoUrl').value = currentState.egoInfo.logoUrl || '';
+            document.getElementById('egoTitle').value = currentState.egoInfo.title || '';
+            document.getElementById('egoQuote').value = currentState.egoInfo.quote || '';
+            document.getElementById('illustUrl').value = currentState.egoInfo.illustUrl || '';
+            document.getElementById('abnormality').value = currentState.egoInfo.abnormality || '';
+            document.getElementById('egoSeason').value = currentState.egoInfo.season || '';
+            document.getElementById('egoName').value = currentState.egoInfo.egoName || '';
+            document.getElementById('egoGrade').value = currentState.egoInfo.egoGrade || '';
+            document.getElementById('egoPrisoner').value = currentState.egoInfo.prisoner || '';
+            document.getElementById('egoReleaseDate').value = currentState.egoInfo.releaseDate || '';
+            document.getElementById('egoGreeting').value = currentState.egoInfo.greeting || '';
+            document.getElementById('egoObtain').value = currentState.egoInfo.obtainMethod || '';
+            document.getElementById('egoKeywords').value = currentState.egoInfo.keywords || '';
+            document.getElementById('egoBgColor').value = currentState.egoInfo.bgColor || '#73468a';
+        }
+
+        function updateMenu3Preview() {
+            const data = {
+                logoUrl: document.getElementById('logoUrl').value || '',
+                title: document.getElementById('egoTitle').value || '인격 명칭',
+                quote: document.getElementById('egoQuote').value || '대사',
+                illustUrl: document.getElementById('illustUrl').value || '',
+                abnormality: document.getElementById('abnormality').value || '(★환상체)',
+                season: document.getElementById('egoSeason').value || '(★시즌)',
+                egoName: document.getElementById('egoName').value || '(★E.G.O)',
+                egoGrade: document.getElementById('egoGrade').value || '(★등급)',
+                prisoner: document.getElementById('egoPrisoner').value || '(★수감자)',
+                releaseDate: document.getElementById('egoReleaseDate').value || '(★날짜)',
+                greeting: document.getElementById('egoGreeting').value || '(★티켓 인사말)',
+                obtainMethod: document.getElementById('egoObtain').value || '(★획득 방법)',
+                keywords: document.getElementById('egoKeywords').value || '(★키워드)',
+                bgColor: document.getElementById('egoBgColor').value || '#73468a'
+            };
+
+            currentState.egoInfo = data;
+
+            let previewHTML = '<div>';
+            
+            previewHTML += `
+                <div style="background: #000; padding: 10px;">
+                    <div style="text-align: center; margin-bottom: 10px; padding-top: 10px;">`;
+            
+            if (data.logoUrl) {
+                previewHTML += `<div style="display: inline-block; vertical-align: middle; margin-right: 1%;"><img src="${data.logoUrl}" width="30" height="auto"></div>`;
+            }
+            
+            previewHTML += `<div style="display: inline-block; vertical-align: middle; width: 50%;"><span style="color: #000000; text-shadow: -1px -1px 0 #ffcc99, 1px -1px 0 #ffcc99, -1px 1px 0 #ffcc99, 1px 1px 0 #ffcc99; display:block; text-decoration:none; background-image: linear-gradient(to left, #000000, ${data.bgColor} 10%, ${data.bgColor} 90%, #000000); font-size: 18px;"><b>${data.title}</b></span></div>
+                    </div>
+                    <div style="text-align: center; margin-bottom: 15px; font-style: italic; color: #ffcc99;">"${data.quote}"</div>`;
+            
+            if (data.illustUrl) {
+                previewHTML += `<div style="text-align: center; margin-bottom: 20px;"><img src="${data.illustUrl}" style="max-width: 100%;"></div>`;
+            }
+            
+            previewHTML += `
+                    <table class="preview-table">
+                        <colgroup>
+                            <col style="width: 20%;"/>
+                            <col style="width: 30%;"/>
+                            <col style="width: 20%;"/>
+                            <col style="width: 30%;"/>
+                        </colgroup>
+                        <tbody>
+                            <tr>
+                                <td class="header-cell" colspan="4">
+                                    <span style="color: #ffcc66; font-size: 15px;"><b>E.G.O 정보</b></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell"><span style="color: #ffcc99;">환상체</span></td>
+                                <td class="value-cell"><span style="color: #ffcc99;">${data.abnormality}</span></td>
+                                <td class="label-cell"><span style="color: #ffcc99;">시즌</span></td>
+                                <td class="value-cell"><span style="color: #ffcc99;">${data.season}</span></td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell"><span style="color: #ffcc99;">E.G.O 명칭</span></td>
+                                <td class="value-cell"><span style="color: #ffcc99;">${data.egoName}</span></td>
+                                <td class="label-cell"><span style="color: #ffcc99;">E.G.O 등급</span></td>
+                                <td class="value-cell"><span style="color: #ffcc99;">${data.egoGrade}</span></td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell"><span style="color: #ffcc99;">수감자</span></td>
+                                <td class="value-cell"><span style="color: #ffcc99;">${data.prisoner}</span></td>
+                                <td class="label-cell"><span style="color: #ffcc99;">출시 시기</span></td>
+                                <td class="value-cell"><span style="color: #ffcc99;">${data.releaseDate}</span></td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell"><span style="color: #ffcc99;">티켓 인사말</span></td>
+                                <td class="value-cell" colspan="3"><span style="color: #ffcc99;">${data.greeting}</span></td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell"><span style="color: #ffcc99;">획득 방법</span></td>
+                                <td class="value-cell" colspan="3"><span style="color: #ffcc99;">${data.obtainMethod}</span></td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell"><span style="color: #ffcc99;">특성 키워드</span></td>
+                                <td class="value-cell" colspan="3"><span style="color: #ffcc99;">${data.keywords}</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            `;
+
+            document.getElementById('preview').innerHTML = previewHTML;
+        }
+
+        function renderContentSections() {
+            const container = document.getElementById('contentSections');
+            container.innerHTML = '';
+            
+            currentState.tocItems.forEach((item, index) => {
+                const sectionId = `content-${index}`;
+                const content = currentState.contentSections[index] || '';
+                
+                const sectionDiv = document.createElement('div');
+                sectionDiv.innerHTML = `
+                    <div class="content-section-header" onclick="toggleContentSection('${sectionId}')">
+                        <span>${item.text}</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="content-editor" id="${sectionId}">
+                        <textarea placeholder="본문 내용을 입력하세요..." oninput="updateContentSection(${index}, this.value)">${content}</textarea>
+                    </div>
+                `;
+                container.appendChild(sectionDiv);
+            });
+        }
+
+        function toggleContentSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const header = section.previousElementSibling;
+            section.style.display = section.style.display === 'none' ? 'block' : 'none';
+            const arrow = header.querySelector('.arrow');
+            arrow.style.transform = section.style.display === 'none' ? 'rotate(-90deg)' : 'rotate(0deg)';
+        }
+
+        function updateContentSection(index, content) {
+            currentState.contentSections[index] = content;
+            updateMenu4Preview();
+        }
+
+        function updateMenu4Preview() {
+            let previewHTML = '<div class="preview-content">';
+            
+            currentState.tocItems.forEach((item, index) => {
+                const content = currentState.contentSections[index] || '';
+                const number = item.text.match(/^[\d.]+/)?.[0] || '';
+                const title = item.text.replace(/^[\d.]+\.?\s*/, '');
+                
+                if (item.level === 1) {
+                    previewHTML += `
+                        <h3 data-ke-size="size23">
+                            <b>∨ <span style="color: #006dd7;">${number}</span> ${title}</b>
+                        </h3>
+                        <hr style="margin-top: 0px;" contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style6">
+                    `;
+                } else {
+                    previewHTML += `
+                        <h3 data-ke-size="size23" style="font-size: 1.1em; margin-left: 20px;">
+                            <b>∨ <span style="color: #006dd7;">${number}</span> ${title}</b>
+                        </h3>
+                        <hr style="margin-top: 0px;" contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style6">
+                    `;
+                }
+                
+                if (content) {
+                    const paragraphs = content.split('\n').filter(p => p.trim());
+                    paragraphs.forEach(paragraph => {
+                        previewHTML += `<p data-ke-size="size16">${paragraph}</p>`;
+                    });
+                }
+                
+                previewHTML += '<p data-ke-size="size16">&nbsp;</p>';
+            });
+            
+            previewHTML += '</div>';
+            document.getElementById('preview').innerHTML = previewHTML;
+        }
+
+        function downloadHTML() {
+            const previewContent = document.getElementById('preview').innerHTML;
+            
+            const fullHTML = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>생성된 HTML</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .preview-toc {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 12px 20px 18px;
+            margin-bottom: 20px;
+            background: white;
+        }
+        .preview-toc-title {
+            font-size: 1.25em;
+            margin-bottom: 10px;
+        }
+        .preview-toc-item {
+            color: #006dd7;
+            margin: 5px 0;
+        }
+        .preview-toc-item.sub {
+            padding-left: 22px;
+        }
+        .preview-info-table {
+            width: 325px;
+            border: 2px solid #bd0000;
+            border-collapse: collapse;
+            background: white;
+            margin-bottom: 20px;
+        }
+        .preview-info-table td {
+            border: 1px solid #000;
+            padding: 8px;
+        }
+        .preview-header {
+            background: #000;
+            text-align: center;
+            padding: 10px;
+        }
+        .preview-label {
+            background: #000;
+            color: #e1bf02;
+            font-weight: bold;
+            text-align: center;
+            width: 30%;
+        }
+        .preview-value {
+            background: white;
+            text-align: left;
+            padding-left: 12px;
+        }
+        .color-preview {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+        }
+        .preview-content h3 {
+            color: #333;
+            font-size: 1.2em;
+            margin: 20px 0 10px 0;
+            padding-bottom: 5px;
+        }
+        .preview-content hr {
+            margin: 0 0 15px 0;
+            border: none;
+            border-top: 2px solid #ddd;
+        }
+        .preview-content p {
+            line-height: 1.6;
+            margin: 10px 0;
+            color: #333;
+        }
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid #996633;
+            margin-top: 2px;
+            margin-bottom: 6px;
+        }
+        .preview-table td {
+            border: 1px solid #996633;
+            padding: 8px;
+            color: #ffcc99;
+        }
+        .preview-table .header-cell {
+            background-image: linear-gradient(120deg, #996633 2%, transparent 2%, transparent 3%, #996633 3%, #996633 4%, transparent 4%, transparent 5%, #996633 5%, #996633 6%, transparent 6%, transparent 94%, #996633 94%, #996633 95%, transparent 95%, transparent 96%, #996633 96%, #996633 97%, transparent 97%, transparent 98%, #996633 98%);
+            background-color: #170c0a;
+            text-align: center;
+            padding: 10px;
+        }
+        .preview-table .label-cell {
+            background-color: #000000;
+            text-align: center;
+            width: 20%;
+        }
+        .preview-table .value-cell {
+            background-color: #3a2716;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+${previewContent}
+</body>
+</html>`;
+            
+            const blob = new Blob([fullHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'generated-content.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function saveJSON() {
+            const jsonContent = JSON.stringify(currentState, null, 2);
+            const blob = new Blob([jsonContent], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'project-state.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            alert('현재 작업 상태가 JSON 파일로 저장되었습니다.');
+        }
+
+        function loadJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const loadedState = JSON.parse(e.target.result);
+                    currentState = loadedState;
+                    
+                    // Restore section visibility if not present in loaded state
+                    if (!currentState.sectionsVisible) {
+                        currentState.sectionsVisible = { toc: true, profile: true };
+                    }
+                    
+                    switchMenu(currentState.activeMenu);
+                    alert('JSON 파일을 성공적으로 불러왔습니다!');
+                } catch (error) {
+                    alert('JSON 파일을 읽는 중 오류가 발생했습니다: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        window.onload = function() {
+            // Initialize section visibility states
+            currentState.sectionsVisible = {
+                toc: !document.getElementById('toc-content').classList.contains('collapsed'),
+                profile: !document.getElementById('profile-content').classList.contains('collapsed')
+            };
+            
+            renderTocList();
+            loadWikiProfile();
+            updateMenu1Preview();
+        };
+    </script>
+</body>
+</html>
